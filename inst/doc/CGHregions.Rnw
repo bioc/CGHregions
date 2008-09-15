@@ -36,7 +36,10 @@ VU University Medical Center
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Overview}
 
-CGHregions allows users to reduce the dimensionality of array CGH data to facilitate downstream analysis. CGHregions takes as input array CGH data (log2-ratios) that have been segmented (i.e., split into chromosomal segments of similar log2-ratios) and called (i.e., a copy number assigned to each segment) on a per-sample basis and adjusts the segmentation so that break-points that are in similar locations across multiple samples are set to be in identical locations. Segmented and called data can be obtained by using the CGHcall package. The resulting dimensionality reduction facilitates downstream analysis in a variety of ways (e.g., reduces severity of multiple hypothesis testing, facilitates clustering and visualization, reduces computer memory requirements). This document provides an overview on the usage of the CGHregions package. For more detailed information on the algorithm and assumptions we refer to the CGHregions article \citep{CGHregions}. As example data we attached the first five samples of the Wilting dataset \citep{Wilting}, called with CGHcall \citep{CGHcall}. 
+CGHregions allows users to reduce the dimensionality of array CGH data to facilitate downstream analysis. CGHregions takes as input array CGH data (log2-ratios) that have been segmented (i.e., split into chromosomal segments of similar log2-ratios) and called (i.e., a copy number assigned to each segment) on a per-sample basis and adjusts the segmentation so that break-points that are in similar locations across multiple samples are set to be in identical locations. Segmented and called data can be obtained by using the CGHcall package. The resulting dimensionality reduction facilitates downstream analysis in a variety of ways (e.g., reduces severity of multiple hypothesis testing, facilitates clustering and visualization, reduces computer memory requirements).
+
+\noindent
+This document provides an overview on the usage of the CGHregions package. For more detailed information on the algorithm and assumptions we refer to the CGHregions article \citep{CGHregions}. As example data we attached the first five samples of the Wilting dataset \citep{Wilting}, called with CGHcall \citep{CGHcall}. 
 
 \section{Example}
 

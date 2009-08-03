@@ -88,6 +88,16 @@ CGHregions <- function(input, averror=0.01) {
     critsatpr   <- cspr[[1]]
     print(c(critfound, cspr[[1]], nrow(cspr[[2]]), nrow(CGHdata)-nrow(cspr[[3]])))
     ifelse(critsatpr <= thresh, cr <- critfound+1, cr <- critfound-1)
+    
+    csmax <- CGHregions:::.deterreg(CGHdata=CGHdata, ncolm, ncolm, normstate, levels) #ADDED 31/7/2009
+    if(csmax[[1]] <= thresh) {
+        stoploop <- 1
+        print("Average error threshold is satisfied for any distance value c")
+        critfound <- ncolm
+        regionsfound <- csmax[[2]]
+        countnomono <- csmax[[3]]
+        }
+    
     while (stoploop == 0) {
         cs      <- CGHregions:::.deterreg(CGHdata=CGHdata, cr, ncolm, normstate, levels)
         critsat <- cs[[1]]

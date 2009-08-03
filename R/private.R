@@ -22,7 +22,7 @@
     chr[reg[1]]
 }
 
-.dist <- function(c1, c2) {
+.dist1 <- function(c1, c2) {
     d <- abs(c1-c2)
     apply(d, 1, sum)
 }
@@ -42,7 +42,7 @@
 .insbr <- function(reg, c, ct) {
     datareg     <- ct[reg[1]:reg[2],-1]
     datareg2    <- rbind(datareg, datareg[nrow(datareg),])[-1,]
-    totdist     <- CGHregions:::.dist(datareg, datareg2)
+    totdist     <- CGHregions:::.dist1(datareg, datareg2)
     totdist2    <- append(totdist, 0, 0)[-length(totdist+1)]
     indc        <- ct[reg[1]:reg[2],1]
     totdisti    <- cbind(indc, totdist, totdist2)
@@ -60,7 +60,7 @@
     datareg     <- CGHregions:::.td(reg, ctdat)
     ind         <- CGHregions:::.tdind(reg, ctdat)
     datareg2    <- rbind(datareg, datareg[nrow(datareg),])[-1,]
-    totdist     <- CGHregions:::.dist(datareg, datareg2)
+    totdist     <- CGHregions:::.dist1(datareg, datareg2)
     maxim       <- max(totdist)
     selectmax   <- cbind(ind, totdist)[totdist==maxim,1]
     selectmax
@@ -76,7 +76,7 @@
         regionstart <- reg[i+1,1]
         c1 <- CGHregions:::.td(c(reg[i,2], reg[i,2]), ctdat)
         c2 <- CGHregions:::.td(c(reg[i+1,1], reg[i+1,1]), ctdat)
-        if (CGHregions:::.dist(c1, c2) > c | is.element(regionstart, breakchr)) {
+        if (CGHregions:::.dist1(c1, c2) > c | is.element(regionstart, breakchr)) {
             regionsst   <- c(regionsst, regionstart)
             regionsend  <- c(regionsend, reg[i,2])
         }
@@ -87,7 +87,7 @@
 
 #take datarows from counts data
 .td <- function(reg, ct) {
-    ct[ct$ind<=reg[2] & ct$ind>= reg[1],][,-1]
+    ct[ct$ind<=reg[2] & ct$ind>= reg[1],,drop=FALSE][,-1]
 }
 
 .ntd <- function(reg, ct) {
@@ -96,7 +96,7 @@
 }
 
 .tdind <- function(reg, ct) {
-    ct[ct$ind<=reg[2]&ct$ind>= reg[1],][,1]
+    ct[ct$ind<=reg[2]&ct$ind>= reg[1],,drop=FALSE][,1]
 }
 
 
@@ -111,14 +111,14 @@
     else {
         takerow <- 1:ncl
     }
-    ctreg   <- ctr[takerow,]
+    ctreg   <- ctr[takerow,,drop=FALSE]
     ctuni   <- unique(ctreg)
     luni    <- dim(ctuni)[1]
     i       <- 1
     cond    <- 0
     while (i < (luni-1) & cond == 0) {
         for (j in luni:(i+1)) {
-            totdist <- CGHregions:::.dist(ctuni[i,], ctuni[j,])      
+            totdist <- CGHregions:::.dist1(ctuni[i,], ctuni[j,])      
             if (totdist>c) cond <- 1
         }
         i <- i+1 
@@ -142,19 +142,23 @@
 #}
 
 #compute right-gradient
-.rightgrad <- function(cl, ct, nro) {
-    mincl <- nro-cl+1        
-    if (mincl==1) {
-        rgrad <- 0
-    } else {
-        minim       <- min(5, mincl)
-        cllst       <- ct[(cl+1):(cl+minim-1),]
-        distvec     <- CGHregions:::.dist2(cllst, ct[cl,]) 
-        weightvec   <- 1:(minim-1)
-        rgrad       <- (distvec %*% weightvec)/sum(weightvec)       
-        rgrad
-    }
-}
+.rightgrad <- function(cl,ct,nro) #changed 28/10/08
+       {
+         #ct<-ctreg;nro<-nr;cl<-1;
+         mincl <- nro-cl+1        
+         if (mincl==1) rgrad <- 0 else
+         {
+         minim <- min(5,mincl)
+         cllst <- ct[(cl+1):(cl+minim-1),,drop=FALSE]
+         #distvec <- dist2(cllst,ct[cl,]) 
+         ct0 <- ct[cl,]
+         distvec2 <- apply(cllst,1,function(x) {dist(rbind(x,ct0),method="manhattan")})
+         weightvec <- 1/(1:(minim-1))
+         rgrad <- (distvec2 %*% weightvec)/sum(weightvec)       
+         rgrad
+         }
+         }
+
 
 .wh <- function(x, i) {
     which(x == i)
@@ -231,7 +235,7 @@
     cmat    <- array(NA, c(el, el))
     for (i in (1:el)) {
         for (j in (1:el)) {
-            ifelse(j<i,cmat[i,j]<-cmat[j,i],cmat[i,j] <- CGHregions:::.dist(uni[i,], uni[j,]))
+            ifelse(j<i,cmat[i,j]<-cmat[j,i],cmat[i,j] <- CGHregions:::.dist1(uni[i,], uni[j,]))
         }
     }
     cmat
@@ -309,6 +313,7 @@
 #initilisation: inserts breaks at chromosome borders; 
 #breakpoint is index of first clone in new region
 .deterreg <- function(CGHdata, crit, ncolm, normstate, levels) {
+#CGHdata <- CGHdataTry;crit<- critst
     chr     <- as.numeric(CGHdata[,1])
     numcl   <- length(chr)
     ind     <- 1:numcl
@@ -327,7 +332,7 @@
             breaks <- difind[dif != 0,][1]
         }
         regions     <- cbind(append(breaks, 1, 0),append(breaks-1, numcl, length(breaks)))
-        allbreaks   <- as.vector(apply(regions, 1, CGHregions:::.insbr, c=crit, ct=counts))
+        allbreaks   <- as.vector(apply(regions, 1, .insbr, c=crit, ct=counts))
         newb        <- c()
         for (i in 1:length(allbreaks)) {
             tp      <- allbreaks[[i]]
@@ -338,7 +343,7 @@
     if (nchr <= 1) {
         breaks      <- c()
         regions     <- c(1, numcl)
-        allbreaks   <- CGHregions:::.insbr(regions, crit, counts)
+        allbreaks   <- .insbr(regions, crit, counts)
         newb        <- c()
         for (i in 1:length(allbreaks)){
             tp      <- allbreaks[[i]]
@@ -353,9 +358,9 @@
     del         <- regions[(regions[,1]-regions[,2]) == 0,1]
     countsdel   <- if (length(del) > 0) counts[-del,] else counts
     if (nrow(regions) > 1) { #adapted 23/08
-        regions2 <- regions[(regions[,1]-regions[,2])<0,]
+        regions2 <- regions[(regions[,1]-regions[,2])<0,,drop=FALSE]
         if (nrow(regions2) > 1) {
-            regions3 <- CGHregions:::.concat(regions2, crit, countsdel, breaks) 
+            regions3 <- .concat(regions2, crit, countsdel, breaks) 
         } else {
             regions3 <- regions2
         }
@@ -363,26 +368,26 @@
         regions3 <- regions
     }
     
-    allcond <- apply(regions3, 1, CGHregions:::.checkcond, c=crit, ctdat=countsdel)
+    allcond <- apply(regions3, 1, .checkcond, c=crit, ctdat=countsdel)
 
     if (max(allcond) == 0) {
         selreg <- regions3
     } else {#only apply gradient ruler if necessary
-        violreg     <- regions3[which.max(allcond),]
-        regions3    <- rbind(regions3, violreg)
+        #violreg     <- regions3[which.max(allcond),,drop=FALSE]
+        #regions3    <- rbind(regions3, violreg)
         selreg      <- c()
         stop        <- 0
 
         #recursive application of gradient ruler
         while (stop==0) {
-            allcond <- apply(regions3, 1, CGHregions:::.checkcond, c=crit, ctdat=countsdel)
+            allcond <- apply(regions3, 1, .checkcond, c=crit, ctdat=countsdel)
             #note '0' indicates that region satisfies criterion
             selreg0 <- cbind(regions3, allcond)
             selreg  <- rbind(selreg, selreg0[allcond==0,-3])
-            newreg  <- selreg0[allcond==1,-3]
+            newreg  <- selreg0[allcond==1,-3,drop=FALSE]
 
             if (!is.null(dim(newreg)) && dim(newreg)[1] != 0) {
-                newbr   <- apply(newreg, 1, CGHregions:::.breek, ctdat=countsdel)
+                newbr   <- apply(newreg, 1, .breek, ctdat=countsdel)
                 #insert newbr into newreg
                 lbr     <- length(newbr)
                 newreg2 <- c()
@@ -392,7 +397,7 @@
                     newreg2 <- rbind(newreg2, c(newreg[i,1], newbr[i]), c(newbr[i]+1, newreg[i,2]))
                 }
                 regions3 <-newreg2
-                regions3 <- rbind(regions3, violreg)
+                #regions3 <- rbind(regions3, violreg)
             }
             if (is.null(dim(newreg)) || dim(newreg)[1] == 0) {
                 stop <- 1
@@ -402,16 +407,16 @@
     
     #DELETE MONO-REGIONS FROM SELREG
     
-    selnew <- selreg[(selreg[,1]-selreg[,2])!=0,]
+    selnew <- selreg[(selreg[,1]-selreg[,2])!=0,,drop=FALSE]
     
     #selects ACTIVE regions, assumes order loss, normal, gain.
     #seqnone <- seq(colnor,length(counts[1,-1]), by = nclass)
     #countsnordel <- counts[,-1][,-seqnone]
 
 
-    sortedact       <- sort(apply(selnew, 1, CGHregions:::.regionact2, ctdat=countsdel), index.return=TRUE, decreasing=TRUE)
+    sortedact       <- sort(apply(selnew, 1, .regionact2, ctdat=countsdel), index.return=TRUE, decreasing=TRUE)
     indicesActReg   <- sortedact$ix[1:ceiling(0.25*nrow(selnew))]
-    ActReg25perc    <- selnew[indicesActReg,]
+    ActReg25perc    <- selnew[indicesActReg,,drop=FALSE]
 
     if(is.null(nrow(ActReg25perc))) {
         ActReg25perc <- rbind(ActReg25perc, ActReg25perc)
@@ -420,7 +425,7 @@
     #ASSUMES  missings are absent!!
     nsam    <- ncolm
     nclone  <- sum(apply(ActReg25perc, 1, function(y){y[2]-y[1]+1}))
-    all     <- apply(ActReg25perc, 1, CGHregions:::.whichsign2, ctdat=countsdel, levels=levels)
+    all     <- apply(ActReg25perc, 1, .whichsign2, ctdat=countsdel, levels=levels)
     avedist <- sum(as.vector(lapply(all, function(x) {x[[2]]}),mode="double"))/(nclone*nsam)
     return(list(avedist, selnew, countsdel))
 }

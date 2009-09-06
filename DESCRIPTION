@@ -1,12 +1,12 @@
 Package:	CGHregions
 Type:		Package
 Title:		Dimension Reduction for Array CGH Data with Minimal Information Loss.
-Version: 1.3.0
+Version:	1.3.1
 Date:		2008-04-29
 Author:		Sjoerd Vosse & Mark van de Wiel
 Maintainer:	Sjoerd Vosse <info@vossewebdevelopment.nl>
 Depends:	R (>= 2.0.0), methods, Biobase, CGHbase
 Description:	Dimension Reduction for Array CGH Data with Minimal Information Loss
-License:	GPL (http://www.gnu.org/copyleft/gpl.html)
+License:	GPL
 biocViews:	Microarray,CopyNumberVariants,Visualization
 Collate:	CGHRegions.R private.R

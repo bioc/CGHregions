@@ -1,7 +1,7 @@
 Package:	CGHregions
 Type:		Package
 Title:		Dimension Reduction for Array CGH Data with Minimal Information Loss.
-Version: 1.6.0
+Version: 1.7.0
 Date:		2009-09-10
 Author:		Sjoerd Vosse & Mark van de Wiel
 Maintainer:	Mark van de Wiel <mark.vdwiel@vumc.nl>

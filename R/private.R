@@ -313,7 +313,7 @@
 #initilisation: inserts breaks at chromosome borders; 
 #breakpoint is index of first clone in new region
 .deterreg <- function(CGHdata, crit, ncolm, normstate, levels) {
-#CGHdata <- CGHdataTry;crit<- critst
+#CGHdata <- CGHdataTry;crit<- 4
     chr     <- as.numeric(CGHdata[,1])
     numcl   <- length(chr)
     ind     <- 1:numcl
@@ -391,7 +391,7 @@
                 #insert newbr into newreg
                 lbr     <- length(newbr)
                 newreg2 <- c()
-                for (i in (1:(lbr-1))) {
+                for (i in (1:lbr)) {
                     reg1 <- c(newreg[i,1], newbr[i])
                     reg2 <- c(newbr[i]+1, newreg[i,2])
                     newreg2 <- rbind(newreg2, c(newreg[i,1], newbr[i]), c(newbr[i]+1, newreg[i,2]))
